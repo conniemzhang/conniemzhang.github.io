@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Logbook</title>
+  <meta name="description" content="Project logbook with pagination." />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>Logbook</h1>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="logbook.html">Logbook</a>
+      </nav>
+    </header>
+
+    <div class="controls">
+      <input id="q" type="search" placeholder="Filter entries (e.g., 'robotics', 'planning')" aria-label="Filter log entries" />
+      <select id="sort" class="select" aria-label="Sort">
+        <option value="newest" selected>Newest first</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+    </div>
+
+    <div id="log-entries"></div>
+
+    <nav class="pagination" aria-label="Pagination">
+      <a class="page-link" id="prev" href="#" aria-disabled="true">← Prev</a>
+      <span id="pages"></span>
+      <a class="page-link" id="next" href="#" aria-disabled="true">Next →</a>
+    </nav>
+
+    <p><a href="index.html">← Back to splash</a></p>
+
+    <footer>
+      <p>Tip: Link directly to a page with <code>?page=2</code>. Edit entries in <code>scripts/entries.js</code>.</p>
+    </footer>
+  </div>
+
+  <script src="scripts/entries.js"></script>
+  <script>
+    const PAGE_SIZE = 5;
+    const $ = (s)=>document.querySelector(s);
+    function getParam(name, fallback){
+      const u = new URL(location.href);
+      return u.searchParams.get(name) || fallback;
+    }
+    function setParam(url, key, value){
+      const u = new URL(url, location.href);
+      if(value==null) u.searchParams.delete(key); else u.searchParams.set(key, value);
+      return u.pathname + "?" + u.searchParams.toString();
+    }
+    function filterEntries(q, items){
+      if(!q) return items;
+      const n = q.toLowerCase();
+      return items.filter(e =>
+        (e.title && e.title.toLowerCase().includes(n)) ||
+        (e.body && e.body.toLowerCase().includes(n)) ||
+        (e.tags && e.tags.join(' ').toLowerCase().includes(n)) ||
+        (e.html && e.html.toLowerCase().includes(n))
+      );
+    }
+    function sortEntries(items, mode){
+      const copy = items.slice();
+      copy.sort((a,b) => {
+        const da = new Date(a.date || 0).getTime();
+        const db = new Date(b.date || 0).getTime();
+        return mode==='oldest' ? (da - db) : (db - da);
+      });
+      return copy;
+    }
+    function escapeHTML(s){
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function render(){
+      const q = $('#q').value.trim();
+      const sortMode = $('#sort').value;
+      const page = Math.max(1, parseInt(getParam('page','1')) || 1);
+      const filtered = filterEntries(q, ENTRIES);
+      const items = sortEntries(filtered, sortMode);
+      const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+      const start = (page - 1) * PAGE_SIZE;
+      const slice = items.slice(start, start + PAGE_SIZE);
+
+      const out = slice.map(e => {
+        const tags = (e.tags||[]).map(t => `<span class="tag">${escapeHTML(t)}</span>`).join('');
+        const body = e.html ? `<div class="entry-body">${e.html}</div>`
+                            : (e.body ? `<div class="entry-body"><p>${escapeHTML(e.body)}</p></div>` : '');
+        return `
+          <article class="log-entry">
+            <h3>${escapeHTML(e.title || '(untitled)')}</h3>
+            <div><time datetime="${escapeHTML(e.date || '')}">${escapeHTML(e.date || '')}</time><span class="tags">${tags}</span></div>
+            ${body}
+            ${e.link ? `<p><a href="${escapeHTML(e.link)}" target="_blank" rel="noopener">Link ↗</a></p>` : ''}
+          </article>
+        `;
+      }).join('') || '<p class="muted">No entries yet.</p>';
+
+      const container = $('#log-entries');
+      container.innerHTML = out;
+
+      const prev = $('#prev'), next = $('#next'), pages = $('#pages');
+      prev.setAttribute('aria-disabled', page <= 1 ? 'true' : 'false');
+      prev.href = page <= 1 ? '#' : setParam(location.href, 'page', String(page - 1));
+      next.setAttribute('aria-disabled', page >= totalPages ? 'true' : 'false');
+      next.href = page >= totalPages ? '#' : setParam(location.href, 'page', String(page + 1));
+
+      pages.innerHTML = '';
+      const add = (node)=>pages.appendChild(node);
+      const addText = (t)=>pages.appendChild(document.createTextNode(t));
+      const makePageLink = (n)=>{
+        const a = document.createElement('a');
+        a.className = 'page-num';
+        a.textContent = n;
+        if(n===page){ a.setAttribute('aria-current','page'); a.href='#'; }
+        else { a.href = setParam(location.href,'page', String(n)); }
+        return a;
+      };
+      const total = totalPages;
+      if(total <= 7){
+        for(let n=1;n<=total;n++) add(makePageLink(n));
+      }else{
+        let last=0;
+        const show=[1, page-1, page, page+1, total].filter(n=>n>=1 && n<=total);
+        const uniq=[...new Set(show)].sort((a,b)=>a-b);
+        for(const n of uniq){
+          if(last && n-last>1) addText(' … ');
+          add(makePageLink(n)); last=n;
+        }
+      }
+    }
+    $('#q').addEventListener('input', ()=>{
+      const u=new URL(location.href); u.searchParams.set('page','1');
+      history.replaceState(null,'',u.pathname+'?'+u.searchParams.toString());
+      render();
+    });
+    $('#sort').addEventListener('change', render);
+    window.addEventListener('popstate', render);
+    render();
+  </script>
+</body>
+</html>
