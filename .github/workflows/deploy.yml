@@ -19,14 +19,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Setup Node first
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      # ✅ Proper pnpm install + PATH wiring
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # (Optional) sanity check
+      - run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
