@@ -1,16 +1,11 @@
 ---
-import Base from "../layouts/Base.astro";
+import Welcome from "@/components/Welcome.astro";
+import Layout from "@/layouts/Layout.astro";
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
-<Base title="Connie Zhang — Robotics & Art">
-  <section class="hero">
-    <div class="card">
-      <h1>Connie Zhang</h1>
-      <h2>Robotics · Creative Tech · Build Logs</h2>
-      <p>Welcome to my tiny internet garden. I ship ideas, log the messy middle, and archive what I learn.</p>
-      <div class="btns">
-        <a class="btn primary" href="/build-log/">Open Build Log</a>
-        <a class="btn ghost" href="mailto:hello@example.com">Contact</a>
-      </div>
-    </div>
-  </section>
-</Base>
+
+<Layout title="Home">
+  <Welcome />
+</Layout>
