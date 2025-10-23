@@ -1,8 +1,10 @@
-name: Deploy Astro site to GitHub Pages
+name: GitHub Pages Deploy (Astro + pnpm)
 
 on:
-  push:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Build"] # <-- name of your build workflow
+    types: [completed]
 
 permissions:
   contents: read
@@ -15,34 +17,25 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Setup Node first
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: pnpm
 
-      # ✅ Proper pnpm install + PATH wiring
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
 
-      # (Optional) sanity check
-      - run: pnpm --version
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build site
-        run: pnpm run build
-
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
