@@ -1,0 +1,16 @@
+# Jekyll config for GitHub Pages
+title: My Site
+description: Splash + Markdown Logbook with Pagination
+baseurl: "" # do not change for user/organization site repos; for project pages you may set it to "/REPO"
+url: ""
+
+# Use GitHub Pages-compatible theme (optional). We'll override with our own layout and CSS.
+theme: minima
+
+# Pagination
+paginate: 5
+paginate_path: "/logbook/page:num"
+
+# Plugins supported by GitHub Pages (jekyll-paginate is supported)
+plugins:
+  - jekyll-paginate

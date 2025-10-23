@@ -1,0 +1,57 @@
+---
+layout: default
+title: Logbook
+permalink: /logbook/
+---
+
+<h1>Logbook</h1>
+<p class="muted">Entries are Markdown files in <code>_posts/</code>. Pagination is automatic.</p>
+
+<div class="controls">
+  <input id="q" type="search" placeholder="Filter by keyword…" aria-label="Filter log entries">
+</div>
+
+<div id="posts">
+{% for post in paginator.posts %}
+  <article class="log-entry">
+    <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+    {% if post.tags %}<span class="tags">{% for t in post.tags %}<span class="tag">{{ t }}</span>{% endfor %}</span>{% endif %}
+    <div class="entry-excerpt">{{ post.excerpt | strip_html | truncate: 200 }}</div>
+  </article>
+{% endfor %}
+</div>
+
+<nav class="pagination">
+  {% if paginator.previous_page %}
+    {% if paginator.previous_page == 1 %}
+      <a class="page-link" href="{{ '/logbook/' | relative_url }}">← Prev</a>
+    {% else %}
+      <a class="page-link" href="{{ '/logbook/page' | append: paginator.previous_page | append: '/' | relative_url }}">← Prev</a>
+    {% endif %}
+  {% else %}
+    <span class="page-link disabled" aria-disabled="true">← Prev</span>
+  {% endif %}
+
+  <span class="page-num">Page {{ paginator.page }} of {{ paginator.total_pages }}</span>
+
+  {% if paginator.next_page %}
+    <a class="page-link" href="{{ '/logbook/page' | append: paginator.next_page | append: '/' | relative_url }}">Next →</a>
+  {% else %}
+    <span class="page-link disabled" aria-disabled="true">Next →</span>
+  {% endif %}
+</nav>
+
+<p><a href="{{ '/' | relative_url }}">← Back to splash</a></p>
+
+<script>
+// Simple client-side filter (non-destructive; for convenience)
+const q = document.querySelector('#q');
+q.addEventListener('input', () => {
+  const needle = q.value.trim().toLowerCase();
+  document.querySelectorAll('.log-entry').forEach(el => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = text.includes(needle) ? '' : 'none';
+  });
+});
+</script>
