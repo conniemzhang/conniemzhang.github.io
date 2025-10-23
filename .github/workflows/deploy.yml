@@ -1,10 +1,11 @@
-name: GitHub Pages Deploy (Astro + pnpm)
+name: Build & Deploy (GitHub Pages)
 
 on:
-  workflow_dispatch:
   workflow_run:
-    workflows: ["Build"] # <-- name of your build workflow
+    workflows: ["Code Quality"] # keep your existing quality gate
     types: [completed]
+    branches: [main, develop]
+  workflow_dispatch: # allow manual "Run workflow" from the Actions tab
 
 permissions:
   contents: read
@@ -17,23 +18,31 @@ concurrency:
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    name: Build
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: pnpm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -41,6 +50,7 @@ jobs:
           path: dist
 
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
     environment:
