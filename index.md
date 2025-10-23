@@ -4,7 +4,9 @@ title: Home
 ---
 
 <div class="splash card">
-  <h1>Welcome</h1>
-  <p class="muted">This is a tiny site powered by <strong>Jekyll</strong> on GitHub Pages. Your logbook entries are just Markdown files—no webdev needed.</p>
-  <p><a class="btn" href="{{ '/logbook/' | relative_url }}">Open the Logbook →</a></p>
+  <h1>Connie's Working Log</h1>
+  <p class="muted"><strong>Why:</strong> Tangible representations of work. Started 10/23/25</p>
+
+  <p><a class="btn" href="{{ '/logbook/' | relative_url }}">View Ongoing Log →</a></p>
+  <p><a class="btn" href="{{ '/projects/' | relative_url }}">View Completed Projects →</a></p>
 </div>
