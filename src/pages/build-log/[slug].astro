@@ -1,0 +1,20 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('builds');
+  return posts.map(p => ({ params: { slug: p.slug }, props: { post: p } }));
+}
+
+const { post } = Astro.props;
+const { title, date, tags } = post.data;
+---
+<Base title={title}>
+  <article>
+    <h1>{title}</h1>
+    <p class="meta">{new Date(date).toLocaleDateString()} {tags?.length ? `· #${tags.join(' #')}` : ''}</p>
+    <div>{post.body}</div>
+    <a class="back" href="/build-log/">← Back</a>
+  </article>
+</Base>
