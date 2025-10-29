@@ -14,3 +14,21 @@ paginate_path: "/logbook/page:num"
 # Plugins supported by GitHub Pages (jekyll-paginate is supported)
 plugins:
   - jekyll-paginate
+
+collections:
+  writing:
+    output: true
+    permalink: /writing/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: writing
+    values:
+      layout: post  # or "writing" if you make a custom layout
+
+# If your theme supports header_pages (e.g., minima):
+header_pages:
+  - logbook.md
+  - projects.md
+  - writing.md

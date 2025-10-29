@@ -9,4 +9,6 @@ title: Home
 
   <p><a class="btn" href="{{ '/logbook/' | relative_url }}">View Ongoing Log →</a></p>
   <p><a class="btn" href="{{ '/projects/' | relative_url }}">View Completed Projects →</a></p>
+  <!-- <p><a class="btn" href="{{ '/writing/' | relative_url }}">View Writing →</a></p> -->
+
 </div>
